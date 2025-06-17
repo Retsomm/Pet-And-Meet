@@ -116,7 +116,7 @@ export default function Home() {
         <h2 className="text-3xl font-bold mb-6 text-center">今日毛孩</h2>
         {loading ? (
           // Skeleton 載入畫面
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4 justify-center">
             <div className="skeleton w-96 h-48 rounded-lg"></div>
             <div className="skeleton w-96 h-48 rounded-lg"></div>
             <div className="skeleton w-96 h-48 rounded-lg"></div>
