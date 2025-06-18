@@ -1,6 +1,11 @@
-import React from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
-
+import { useNavigate } from "react-router";
+import { Like } from "../components/Like";
+import { getAuth } from "firebase/auth";
+import { db } from "../../firebase";
+import { ref, onValue } from "firebase/database";
+import { remove, query, orderByChild, equalTo, get } from "firebase/database";
 // 性別顯示對照表
 const sexDisplay = {
   M: "公",
@@ -8,18 +13,34 @@ const sexDisplay = {
   N: "未知",
 };
 
-/**
- * 動物卡片元件
- * @param {Object} props
- * @param {Object} props.animal - 動物資料物件
- * @param {Function} props.onFavorite - 收藏按鈕點擊處理函式（可選）
- * @param {Function} props.onViewDetail - 詳細資料按鈕點擊處理函式（可選）
- */
-const AnimalCard = React.memo(({ animal, onFavorite, onViewDetail }) => {
-  const { ref, inView } = useInView({ 
-    triggerOnce: true, 
-    threshold: 0.1 
+const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
+  const navigate = useNavigate();
+  const [isCollected, setIsCollected] = useState(false);
+  const { ref: inViewRef, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
   });
+
+  // 監聽是否已收藏
+  useEffect(() => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) return;
+    const collectsRef = ref(db, `users/${user.uid}/collects`);
+    const unsubscribe = onValue(collectsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setIsCollected(
+          Object.values(data).some(
+            (item) => item.animal_id === animal.animal_id
+          )
+        );
+      } else {
+        setIsCollected(false);
+      }
+    });
+    return () => unsubscribe();
+  }, [animal.animal_id]);
 
   // 處理圖片載入錯誤
   const handleImageError = (e) => {
@@ -28,27 +49,43 @@ const AnimalCard = React.memo(({ animal, onFavorite, onViewDetail }) => {
   };
 
   // 處理收藏按鈕點擊
-  const handleFavoriteClick = () => {
-    if (onFavorite) {
-      onFavorite(animal);
+  const handleFavorite = useCallback(async () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const collectsRef = ref(db, `users/${user.uid}/collects`);
+    if (!isCollected) {
+      // 新增收藏
+      await Like(animal);
     } else {
-      console.log("收藏動物:", animal.animal_id);
-      // 這裡可以加入預設的收藏邏輯
+      // 取消收藏
+      // 找到該 animal_id 的收藏紀錄
+      const q = query(
+        collectsRef,
+        orderByChild("animal_id"),
+        equalTo(animal.animal_id)
+      );
+      const snapshot = await get(q);
+      if (snapshot.exists()) {
+        snapshot.forEach((child) => {
+          remove(ref(db, `users/${user.uid}/collects/${child.key}`));
+        });
+      }
     }
-  };
+  }, [animal, isCollected]);
 
   // 處理詳細資料按鈕點擊
   const handleDetailClick = () => {
     if (onViewDetail) {
       onViewDetail(animal);
     } else {
-      console.log("查看詳細資料:", animal.animal_id);
-      // 這裡可以加入預設的詳細資料邏輯
+      navigate(`/animal/${animal.animal_id}`, { state: { from } });
     }
   };
 
   return (
-    <div ref={ref} className="card bg-base-100 w-96 shadow-xl gap-3 m-3">
+    <div ref={inViewRef} className="card bg-base-100 w-96 shadow-xl gap-3 m-3">
       {inView && (
         <div className="flex">
           <figure className="w-1/2 flex-shrink-0">
@@ -67,13 +104,27 @@ const AnimalCard = React.memo(({ animal, onFavorite, onViewDetail }) => {
             <p>顏色：{animal.animal_colour}</p>
             <p>體型：{animal.animal_bodytype}</p>
             <div className="card-actions justify-end mt-2">
-              <button 
-                className="btn btn-primary btn-sm"
-                onClick={handleFavoriteClick}
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={handleFavorite}
+                aria-label={isCollected ? "已收藏" : "收藏"}
               >
-                收藏
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill={isCollected ? "currentColor" : "none"}
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="size-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+                  />
+                </svg>
               </button>
-              <button 
+              <button
                 className="btn btn-primary btn-sm"
                 onClick={handleDetailClick}
               >
@@ -87,7 +138,6 @@ const AnimalCard = React.memo(({ animal, onFavorite, onViewDetail }) => {
   );
 });
 
-// 設定元件顯示名稱，方便除錯
-AnimalCard.displayName = 'AnimalCard';
+AnimalCard.displayName = "AnimalCard";
 
 export default AnimalCard;

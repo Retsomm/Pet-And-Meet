@@ -1,14 +1,14 @@
 import Navbar from "./Navbar";
 import Dock from "./Dock";
 import { Outlet } from "react-router";
-export default function Layout({ currentTheme, onToggleTheme }) {
+export default function Layout() {
   return (
     <div>
-      <Navbar currentTheme={currentTheme} onToggleTheme={onToggleTheme} />
+      <Navbar />
       <main className="min-h-screen flex flex-col justify-center items-center z-0 sm:mt-10 m-3">
         <Outlet />
       </main>
-      <Dock currentTheme={currentTheme} onToggleTheme={onToggleTheme} />
+      <Dock />
     </div>
   );
 }

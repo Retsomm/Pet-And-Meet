@@ -1,5 +1,39 @@
-export default function Profile(){
+import useAuthStore from "../store/useAuthStore";
+import { useNavigate } from "react-router";
+import { useEffect } from "react";
+
+export default function Profile() {
+  const { user, isLoggedIn } = useAuthStore();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/login");
+    }
+  }, [isLoggedIn, navigate]);
+
+  if (!user) {
+    return <div className="text-center mt-10">尚未登入</div>;
+  }
+
   return (
-    <div>profile</div>
-  )
+    <div className="flex flex-col items-center mt-10">
+      <img
+        src={user.avatarUrl || "https://i.pravatar.cc/100"}
+        alt="User Avatar"
+        style={{ width: 100, height: 100, borderRadius: "50%" }}
+      />
+      <h2 className="text-2xl font-bold mt-4">{user.displayName}</h2>
+      <p className="mt-2">{user.email}</p>
+      <button
+        className="btn btn-error mt-6"
+        onClick={() => {
+          useAuthStore.getState().logout();
+          navigate("/");
+        }}
+      >
+        登出
+      </button>
+    </div>
+  );
 }

@@ -1,15 +1,21 @@
-const ThemeToggle = ({ currentTheme, onToggleTheme }) => {
-  const handleToggle = () => {
-    onToggleTheme();
-    
-  };
+import { useEffect } from "react";
+import useThemeStore from "../store/useThemeStore";
+
+const ThemeToggle = () => {
+  const { currentTheme, toggleTheme } = useThemeStore();
+
+  // 當 currentTheme 改變時，設置 <html data-theme="xxx">
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", currentTheme);
+  }, [currentTheme]);
+
   return (
     <label className="swap swap-rotate">
       <input
         type="checkbox"
         className="theme-controller"
         checked={currentTheme === "sunset"}
-        onChange={handleToggle}
+        onChange={toggleTheme}
       />
       <svg
         className="swap-off fill-current w-6 h-6"

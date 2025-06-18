@@ -1,25 +1,47 @@
+import React, { useState } from "react";
 import "./App.css";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Data from "./pages/Data";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
+import DataItem from "./pages/DataItem";
+import Collect from "./pages/Collect";
 import { BrowserRouter, Routes, Route } from "react-router";
-import { useTheme } from "./hooks/useTheme";
+
 function App() {
-  const { currentTheme, toggleTheme } = useTheme();
+  // 新增登入狀態管理
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+
+  const handleLoginClick = () => {
+    setIsLoggedIn(true);
+    setUser({
+      avatarUrl: "https://i.pravatar.cc/40",
+    });
+  };
+
   return (
     <BrowserRouter>
       <Routes>
         <Route
           path="/"
           element={
-            <Layout currentTheme={currentTheme} onToggleTheme={toggleTheme} />
+            <Layout
+              isLoggedIn={isLoggedIn}
+              user={user}
+              onLoginClick={handleLoginClick}
+            />
           }
         >
           <Route path="/" element={<Home />} />
           <Route path="/data" element={<Data />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/animal/:id" element={<DataItem />} />
+          <Route path="/collect" element={<Collect />} />
+          <Route
+            path="/login"
+            element={<Login setIsLoggedIn={setIsLoggedIn} setUser={setUser} />}
+          />
           <Route path="/profile" element={<Profile />} />
         </Route>
       </Routes>

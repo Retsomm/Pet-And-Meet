@@ -31,7 +31,6 @@ export default function Home() {
       <div className="hero min-h-96 bg-gradient-to-rrounded-box mb-8">
         <div className="hero-content text-center">
           <div className="max-w-md">
-            <h1 className="text-5xl font-bold mb-4">🐾 毛孩相遇站</h1>
             <p className="py-6">
               每一隻毛孩都值得被愛，每一個家庭都值得擁有溫暖的陪伴。
               讓我們一起為牠們找到永遠的家！

@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-// 引入新建立的API檔案和卡片元件
 import { fetchAnimals, filterAnimals } from "../components/animalAPI";
 import AnimalCard from "../components/AnimalCard";
 
@@ -120,7 +119,6 @@ const Data = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [filters, setFilters] = useState({ area: "", type: "", sex: "" });
   const [loading, setLoading] = useState(true);
-
   // 分頁相關狀態
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20);
@@ -178,18 +176,6 @@ const Data = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  // 處理收藏功能（可以自訂）
-  const handleFavorite = useCallback((animal) => {
-    console.log("收藏動物:", animal.animal_id);
-    // 在這裡加入收藏邏輯，例如存到 localStorage 或發送到後端
-  }, []);
-
-  // 處理查看詳細資料功能（可以自訂）
-  const handleViewDetail = useCallback((animal) => {
-    console.log("查看詳細資料:", animal.animal_id);
-    // 在這裡加入詳細資料邏輯，例如開啟 modal 或跳轉頁面
-  }, []);
-
   return (
     <div className="relative min-h-screen sm:pt-10">
       {/* 篩選按鈕區域 */}
@@ -211,6 +197,7 @@ const Data = () => {
           onConfirm={handleFilter}
           onReset={handleReset}
           onClose={() => setShowFilter(false)}
+          
         />
       )}
 
@@ -222,12 +209,7 @@ const Data = () => {
         <>
           <div className="flex flex-wrap pt-24 justify-center items-center px-4">
             {currentAnimals.map((animal) => (
-              <AnimalCard
-                key={animal.animal_id}
-                animal={animal}
-                onFavorite={handleFavorite}
-                onViewDetail={handleViewDetail}
-              />
+              <AnimalCard key={animal.animal_id} animal={animal} from="data"/>
             ))}
           </div>
 
