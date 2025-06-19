@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import ThemeToggle from "./ThemeToggle";
-import useAuthStore from "../store/useAuthStore";
+import useAuthStore from "../stores/useAuthStore";
 
 export default function Navbar() {
   const { isLoggedIn, user } = useAuthStore();

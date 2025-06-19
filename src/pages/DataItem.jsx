@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useLocation, useParams, useNavigate } from "react-router";
-import { fetchAnimals } from "../components/animalAPI";
-import { Like } from "../components/Like";
+import { useFetchAnimals } from "../hooks/useFetchAnimals";
+import { useFavorite } from "../hooks/useFavorite";
+
 const keyMap = {
   animal_id: "動物流水編號",
   animal_subid: "動物管理編號",
@@ -31,30 +32,26 @@ const keyMap = {
   cDate: "領養公告日期",
   shelter_address: "收容所地址",
   shelter_tel: "收容所電話",
-  // ...可依需求補充
 };
+
 export default function DataItem() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const [animal, setAnimal] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { animals, loading, error } = useFetchAnimals();
+  const [showAlert, setShowAlert] = React.useState(false);
 
-  useEffect(() => {
-    const loadAnimal = async () => {
-      setLoading(true);
-      const animals = await fetchAnimals();
-      const found = animals.find((a) => String(a.animal_id) === id);
-      setAnimal(found);
-      setLoading(false);
-    };
-    loadAnimal();
-  }, [id]);
+  const animal = React.useMemo(
+    () => animals.find((a) => String(a.animal_id) === id),
+    [animals, id]
+  );
+
+  const { isCollected, toggleFavorite } = useFavorite(animal);
 
   if (loading) return <span className="loading loading-ring loading-lg"></span>;
+  if (error) return <div className="text-center mt-10">資料載入失敗</div>;
   if (!animal) return <div className="text-center mt-10">找不到毛孩資料</div>;
 
-  // Google Map 導航網址
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     animal.animal_place || ""
   )}`;
@@ -75,7 +72,6 @@ export default function DataItem() {
           </div>
         ))}
       </div>
-      {/* Google Map 導航按鈕 */}
       <a
         href={mapUrl}
         target="_blank"
@@ -85,20 +81,24 @@ export default function DataItem() {
         Google Map 導航
       </a>
       <button
-        className="btn btn-warning w-full mb-4"
+        className={`btn w-full mb-4 ${
+          isCollected ? "btn-error" : "btn-warning"
+        }`}
         onClick={async () => {
-          await Like(animal);
-          alert("已收藏！");
+          await toggleFavorite();
+          setShowAlert(true);
+          setTimeout(() => setShowAlert(false), 2000);
         }}
       >
-        收藏這隻毛孩
+        {isCollected ? "取消收藏" : "收藏這隻毛孩"}
       </button>
-      {/* 回到上一頁按鈕 */}
       <button
         className="btn btn-outline w-full"
         onClick={() => {
           if (location.state?.from === "collect") {
             navigate("/collect");
+          } else if (location.state?.from === "/") {
+            navigate("/");
           } else {
             navigate("/data");
           }
@@ -106,6 +106,30 @@ export default function DataItem() {
       >
         回到上一頁
       </button>
+      {showAlert && (
+        <div
+          role="alert"
+          className="fixed inset-0 flex items-center justify-center z-50"
+          style={{ background: "rgba(0,0,0,0.2)" }}
+        >
+          <div className="alert alert-success flex items-center rounded shadow-lg p-6 w-fit">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>{isCollected ? "已收藏" : "已取消收藏"}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,11 +1,8 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React from "react";
 import { useInView } from "react-intersection-observer";
 import { useNavigate } from "react-router";
-import { Like } from "../components/Like";
-import { getAuth } from "firebase/auth";
-import { db } from "../../firebase";
-import { ref, onValue } from "firebase/database";
-import { remove, query, orderByChild, equalTo, get } from "firebase/database";
+import { useFavorite } from "../hooks/useFavorite";
+
 // 性別顯示對照表
 const sexDisplay = {
   M: "公",
@@ -14,66 +11,21 @@ const sexDisplay = {
 };
 
 const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
+  const { isCollected, toggleFavorite, isLoggedIn } = useFavorite(animal);
+  const [showLoginAlert, setShowLoginAlert] = React.useState(false);
   const navigate = useNavigate();
-  const [isCollected, setIsCollected] = useState(false);
+  // 使用 Intersection Observer 來懶加載圖片
+  // 當卡片進入視窗時才載入圖片
   const { ref: inViewRef, inView } = useInView({
     triggerOnce: true,
     threshold: 0.1,
   });
-
-  // 監聽是否已收藏
-  useEffect(() => {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (!user) return;
-    const collectsRef = ref(db, `users/${user.uid}/collects`);
-    const unsubscribe = onValue(collectsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        setIsCollected(
-          Object.values(data).some(
-            (item) => item.animal_id === animal.animal_id
-          )
-        );
-      } else {
-        setIsCollected(false);
-      }
-    });
-    return () => unsubscribe();
-  }, [animal.animal_id]);
 
   // 處理圖片載入錯誤
   const handleImageError = (e) => {
     e.target.onerror = null;
     e.target.src = "/default.jpg";
   };
-
-  // 處理收藏按鈕點擊
-  const handleFavorite = useCallback(async () => {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (!user) return;
-
-    const collectsRef = ref(db, `users/${user.uid}/collects`);
-    if (!isCollected) {
-      // 新增收藏
-      await Like(animal);
-    } else {
-      // 取消收藏
-      // 找到該 animal_id 的收藏紀錄
-      const q = query(
-        collectsRef,
-        orderByChild("animal_id"),
-        equalTo(animal.animal_id)
-      );
-      const snapshot = await get(q);
-      if (snapshot.exists()) {
-        snapshot.forEach((child) => {
-          remove(ref(db, `users/${user.uid}/collects/${child.key}`));
-        });
-      }
-    }
-  }, [animal, isCollected]);
 
   // 處理詳細資料按鈕點擊
   const handleDetailClick = () => {
@@ -106,7 +58,17 @@ const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
             <div className="card-actions justify-end mt-2">
               <button
                 className="btn btn-ghost btn-sm"
-                onClick={handleFavorite}
+                disabled={!isLoggedIn}
+                onClick={async (e) => {
+                  console.log("isLoggedIn", isLoggedIn);
+                  if (!isLoggedIn) {
+                    e.preventDefault();
+                    setShowLoginAlert(true);
+                    setTimeout(() => setShowLoginAlert(false), 2000);
+                    return;
+                  }
+                  await toggleFavorite();
+                }}
                 aria-label={isCollected ? "已收藏" : "收藏"}
               >
                 <svg
@@ -124,6 +86,11 @@ const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
                   />
                 </svg>
               </button>
+              {showLoginAlert && (
+                <div className="alert alert-error fixed top-4 left-1/2 -translate-x-1/2 z-50">
+                  請先登入
+                </div>
+              )}
               <button
                 className="btn btn-primary btn-sm"
                 onClick={handleDetailClick}

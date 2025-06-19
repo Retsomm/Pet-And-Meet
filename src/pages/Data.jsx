@@ -1,176 +1,46 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { fetchAnimals, filterAnimals } from "../components/animalAPI";
+import React, { useState, useMemo, useCallback } from "react";
+import { useFetchAnimals } from "../hooks/useFetchAnimals";
+import { filterAnimals } from "../utils/filterAnimals";
 import AnimalCard from "../components/AnimalCard";
-
-// 篩選選單元件 (沒有修改)
-const AREAS = [
-  "全部",
-  "宜蘭縣",
-  "臺南市",
-  "澎湖縣",
-  "新北市",
-  "臺北市",
-  "臺東縣",
-  "桃園市",
-  "苗栗縣",
-  "花蓮縣",
-  "金門縣",
-  "新竹市",
-  "彰化縣",
-  "嘉義市",
-  "雲林縣",
-  "臺中市",
-  "基隆市",
-  "南投縣",
-  "屏東縣",
-  "嘉義縣",
-  "連江縣",
-];
-const TYPES = ["全部", "貓", "狗", "其他"];
-const SEXES = ["全部", "公", "母", "未知"];
-
-const AnimalFilterMenu = ({
-  filters,
-  setFilters,
-  onConfirm,
-  onReset,
-  onClose,
-}) => (
-  <div className="fixed w-screen h-screen top-0 left-0 z-50 p-8 overflow-auto bg-base-100">
-    <div className="flex justify-between items-center mb-8">
-      <h2 className="text-2xl font-bold">篩選條件</h2>
-      <button className="text-2xl" onClick={onClose}>
-        ×
-      </button>
-    </div>
-    <div className="mb-6">
-      <div className="mb-2 font-bold">地區</div>
-      <div className="flex flex-wrap gap-2">
-        {AREAS.map((area) => (
-          <button
-            key={area}
-            className={`btn btn-outline btn-sm ${
-              filters.area === area || (filters.area === "" && area === "全部")
-                ? "btn-info"
-                : ""
-            }`}
-            onClick={() =>
-              setFilters((f) => ({ ...f, area: area === "全部" ? "" : area }))
-            }
-          >
-            {area}
-          </button>
-        ))}
-      </div>
-    </div>
-    <div className="mb-6">
-      <div className="mb-2 font-bold">種類</div>
-      <div className="flex gap-2">
-        {TYPES.map((type) => (
-          <button
-            key={type}
-            className={`btn btn-outline btn-sm ${
-              filters.type === type || (filters.type === "" && type === "全部")
-                ? "btn-info"
-                : ""
-            }`}
-            onClick={() =>
-              setFilters((f) => ({ ...f, type: type === "全部" ? "" : type }))
-            }
-          >
-            {type}
-          </button>
-        ))}
-      </div>
-    </div>
-    <div className="mb-6">
-      <div className="mb-2 font-bold">性別</div>
-      <div className="flex gap-2">
-        {SEXES.map((sex) => (
-          <button
-            key={sex}
-            className={`btn btn-outline btn-sm ${
-              filters.sex === sex || (filters.sex === "" && sex === "全部")
-                ? "btn-info"
-                : ""
-            }`}
-            onClick={() =>
-              setFilters((f) => ({ ...f, sex: sex === "全部" ? "" : sex }))
-            }
-          >
-            {sex}
-          </button>
-        ))}
-      </div>
-    </div>
-    <div className="flex gap-4 mt-12">
-      <button className="btn btn-outline flex-1" onClick={onReset}>
-        重置
-      </button>
-      <button className="btn btn-outline flex-1" onClick={onConfirm}>
-        確認
-      </button>
-    </div>
-  </div>
-);
+import { useUserCollects } from "../hooks/useUserCollects";
+import AnimalFilterMenu from "../components/AnimalFilterMenu";
 
 const Data = () => {
-  const [animals, setAnimals] = useState([]);
+  const { animals, loading, error } = useFetchAnimals();
   const [showFilter, setShowFilter] = useState(false);
   const [filters, setFilters] = useState({ area: "", type: "", sex: "" });
-  const [loading, setLoading] = useState(true);
-  // 分頁相關狀態
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20);
+  const collects = useUserCollects();
 
-  // 使用新的API函式來載入資料
-  useEffect(() => {
-    const loadAnimals = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchAnimals();
-        setAnimals(data);
-      } catch (error) {
-        console.error("載入動物資料時發生錯誤:", error);
-        // 可以在這裡加入錯誤處理，例如顯示錯誤訊息
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadAnimals();
-  }, []);
-
-  // 使用新的篩選函式
+  // 篩選後的動物資料
   const filteredAnimals = useMemo(() => {
     return filterAnimals(animals, filters);
   }, [animals, filters]);
 
-  // 計算當前頁面要顯示的資料
+  // 分頁
   const currentAnimals = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     return filteredAnimals.slice(startIndex, endIndex);
   }, [filteredAnimals, currentPage, itemsPerPage]);
 
-  // 計算總頁數
   const totalPages = Math.ceil(filteredAnimals.length / itemsPerPage);
 
   // 篩選條件改變時重設頁面
-  useEffect(() => {
+  React.useEffect(() => {
     setCurrentPage(1);
   }, [filters]);
-
+  // 當 animals 改變時重設頁面
   const handleFilter = useCallback(() => {
     setShowFilter(false);
   }, []);
-
+  // 重置篩選條件
   const handleReset = useCallback(() => {
     setFilters({ area: "", type: "", sex: "" });
     setShowFilter(false);
   }, []);
-
-  // 換頁功能
+  // 分頁按鈕點擊處理
   const handlePageChange = useCallback((page) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -189,7 +59,7 @@ const Data = () => {
           </button>
         </div>
       </div>
-
+      {/* 篩選條件選單 */}
       {showFilter && (
         <AnimalFilterMenu
           filters={filters}
@@ -197,20 +67,31 @@ const Data = () => {
           onConfirm={handleFilter}
           onReset={handleReset}
           onClose={() => setShowFilter(false)}
-          
         />
       )}
-
+      {/* 動物卡片區域 */}
       {loading ? (
         <div className="flex items-center justify-center h-[60vh]">
           <span className="loading loading-infinity loading-lg"></span>
         </div>
+      ) : error ? (
+        <div className="text-center mt-10">資料載入失敗</div>
       ) : (
         <>
           <div className="flex flex-wrap pt-24 justify-center items-center px-4">
-            {currentAnimals.map((animal) => (
-              <AnimalCard key={animal.animal_id} animal={animal} from="data"/>
-            ))}
+            {currentAnimals.map((animal) => {
+              const isCollected = collects.some(
+                (item) => item.animal_id === animal.animal_id
+              );
+              return (
+                <AnimalCard
+                  key={animal.animal_id}
+                  animal={animal}
+                  isCollected={isCollected}
+                  from="data"
+                />
+              );
+            })}
           </div>
 
           {/* 分頁按鈕 */}
@@ -223,8 +104,6 @@ const Data = () => {
               >
                 上一頁
               </button>
-
-              {/* 顯示頁碼 */}
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 let pageNum;
                 if (totalPages <= 5) {
@@ -236,7 +115,6 @@ const Data = () => {
                 } else {
                   pageNum = currentPage - 2 + i;
                 }
-
                 return (
                   <button
                     key={pageNum}
@@ -249,7 +127,6 @@ const Data = () => {
                   </button>
                 );
               })}
-
               <button
                 className="btn btn-outline btn-sm"
                 disabled={currentPage === totalPages}

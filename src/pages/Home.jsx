@@ -1,34 +1,32 @@
-import { fetchAnimals } from "../components/animalAPI";
+import { useMemo } from "react";
+import { useFetchAnimals } from "../hooks/useFetchAnimals";
 import AnimalCard from "../components/AnimalCard";
-import React, { useEffect, useState } from "react";
-export default function Home() {
-  const [dailyAnimals, setDailyAnimals] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  function getRandomElementsFromArray(array, count) {
-    const indexes = [];
-    const arrayLength = array.length;
-    const num = Math.min(count, arrayLength);
-    while (indexes.length < num) {
-      const randomIndex = Math.floor(Math.random() * arrayLength);
-      if (!indexes.includes(randomIndex)) {
-        indexes.push(randomIndex);
-      }
+function getRandomElementsFromArray(array, count) {
+  const indexes = [];
+  const arrayLength = array.length;
+  const num = Math.min(count, arrayLength);
+  while (indexes.length < num) {
+    const randomIndex = Math.floor(Math.random() * arrayLength);
+    if (!indexes.includes(randomIndex)) {
+      indexes.push(randomIndex);
     }
-    return indexes.map((index) => array[index]);
   }
-  useEffect(() => {
-    fetchAnimals().then((data) => {
-      const randomAnimals = getRandomElementsFromArray(data, 3);
-      setDailyAnimals(randomAnimals);
-      setLoading(false); // 資料載入完成
-    });
-  }, []);
+  return indexes.map((index) => array[index]);
+}
+
+export default function Home() {
+  const { animals, loading, error } = useFetchAnimals();
+
+  const dailyAnimals = useMemo(() => {
+    if (!animals || animals.length === 0) return [];
+    return getRandomElementsFromArray(animals, 3);
+  }, [animals]);
 
   return (
     <>
       {/* 主視覺區域 */}
-      <div className="hero min-h-96 bg-gradient-to-rrounded-box mb-8">
+      <div className="hero min-h-96 bg-gradient-to-r rounded-box mb-8">
         <div className="hero-content text-center">
           <div className="max-w-md">
             <p className="py-6">
@@ -114,18 +112,17 @@ export default function Home() {
       <div className="mb-8 flex flex-col justify-center">
         <h2 className="text-3xl font-bold mb-6 text-center">今日毛孩</h2>
         {loading ? (
-          // Skeleton 載入畫面
           <div className="flex flex-wrap gap-4 justify-center">
             <div className="skeleton w-96 h-48 rounded-lg"></div>
             <div className="skeleton w-96 h-48 rounded-lg"></div>
             <div className="skeleton w-96 h-48 rounded-lg"></div>
           </div>
+        ) : error ? (
+          <div className="text-center text-red-500">資料載入失敗</div>
         ) : (
-          // 資料載入完成後顯示動物卡片
-
           <div className="flex flex-wrap justify-center">
             {dailyAnimals.map((animal) => (
-              <AnimalCard key={animal.animal_id} animal={animal} />
+              <AnimalCard key={animal.animal_id} animal={animal} from="/" />
             ))}
           </div>
         )}

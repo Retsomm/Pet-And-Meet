@@ -1,7 +1,7 @@
-import useAuthStore from "../store/useAuthStore";
+import useAuthStore from "../stores/useAuthStore";
 import { useNavigate } from "react-router";
 import { useEffect } from "react";
-
+import { getAuth, signOut } from "firebase/auth";
 export default function Profile() {
   const { user, isLoggedIn } = useAuthStore();
   const navigate = useNavigate();
@@ -27,8 +27,13 @@ export default function Profile() {
       <p className="mt-2">{user.email}</p>
       <button
         className="btn btn-error mt-6"
-        onClick={() => {
+        onClick={async () => {
+          // 1. 登出 Firebase Auth
+          const auth = getAuth();
+          await signOut(auth);
+          // 2. 清除本地狀態
           useAuthStore.getState().logout();
+          // 3. 導回首頁
           navigate("/");
         }}
       >
