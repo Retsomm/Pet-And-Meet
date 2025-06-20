@@ -1,3 +1,4 @@
+import React from "react";
 const AREAS = [
   "全部",
   "宜蘭縣",
@@ -46,7 +47,7 @@ const AnimalFilterMenu = ({
             key={area}
             className={`btn btn-outline btn-sm ${
               filters.area === area || (filters.area === "" && area === "全部")
-                ? "btn-info"
+                ? "btn-primary"
                 : ""
             }`}
             onClick={() =>
@@ -66,7 +67,7 @@ const AnimalFilterMenu = ({
             key={type}
             className={`btn btn-outline btn-sm ${
               filters.type === type || (filters.type === "" && type === "全部")
-                ? "btn-info"
+                ? "btn-primary"
                 : ""
             }`}
             onClick={() =>
@@ -86,7 +87,7 @@ const AnimalFilterMenu = ({
             key={sex}
             className={`btn btn-outline btn-sm ${
               filters.sex === sex || (filters.sex === "" && sex === "全部")
-                ? "btn-info"
+                ? "btn-primary"
                 : ""
             }`}
             onClick={() =>
@@ -109,4 +110,4 @@ const AnimalFilterMenu = ({
   </div>
 );
 
-export default AnimalFilterMenu;
+export default React.memo(AnimalFilterMenu);

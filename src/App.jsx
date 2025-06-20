@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import "./App.css";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
@@ -10,38 +9,15 @@ import Collect from "./pages/Collect";
 import { BrowserRouter, Routes, Route } from "react-router";
 
 function App() {
-  // 新增登入狀態管理
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
-
-  const handleLoginClick = () => {
-    setIsLoggedIn(true);
-    setUser({
-      avatarUrl: "https://i.pravatar.cc/40",
-    });
-  };
-
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <Layout
-              isLoggedIn={isLoggedIn}
-              user={user}
-              onLoginClick={handleLoginClick}
-            />
-          }
-        >
+        <Route path="/" element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/data" element={<Data />} />
           <Route path="/animal/:id" element={<DataItem />} />
           <Route path="/collect" element={<Collect />} />
-          <Route
-            path="/login"
-            element={<Login setIsLoggedIn={setIsLoggedIn} setUser={setUser} />}
-          />
+          <Route path="/login" element={<Login />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
       </Routes>

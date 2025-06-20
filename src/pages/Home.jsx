@@ -1,23 +1,19 @@
 import { useMemo } from "react";
 import { useFetchAnimals } from "../hooks/useFetchAnimals";
 import AnimalCard from "../components/AnimalCard";
-
+import { useNavigate } from "react-router";
 function getRandomElementsFromArray(array, count) {
-  const indexes = [];
-  const arrayLength = array.length;
-  const num = Math.min(count, arrayLength);
-  while (indexes.length < num) {
-    const randomIndex = Math.floor(Math.random() * arrayLength);
-    if (!indexes.includes(randomIndex)) {
-      indexes.push(randomIndex);
-    }
+  const shuffled = [...array]; 
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; // 交換元素
   }
-  return indexes.map((index) => array[index]);
+  return shuffled.slice(0, Math.min(count, shuffled.length));
 }
 
 export default function Home() {
   const { animals, loading, error } = useFetchAnimals();
-
+  const navigate = useNavigate();
   const dailyAnimals = useMemo(() => {
     if (!animals || animals.length === 0) return [];
     return getRandomElementsFromArray(animals, 3);
@@ -33,7 +29,9 @@ export default function Home() {
               每一隻毛孩都值得被愛，每一個家庭都值得擁有溫暖的陪伴。
               讓我們一起為牠們找到永遠的家！
             </p>
-            <button className="btn">開始尋找毛孩</button>
+            <button className="btn" onClick={() => navigate("/data")}>
+              開始尋找毛孩
+            </button>
           </div>
         </div>
       </div>

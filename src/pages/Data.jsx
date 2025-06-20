@@ -10,8 +10,8 @@ const Data = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [filters, setFilters] = useState({ area: "", type: "", sex: "" });
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(20);
-  const collects = useUserCollects();
+  const itemsPerPage = 20;
+  const { collects = [], loading: collectsLoading } = useUserCollects();
 
   // 篩選後的動物資料
   const filteredAnimals = useMemo(() => {
@@ -31,15 +31,17 @@ const Data = () => {
   React.useEffect(() => {
     setCurrentPage(1);
   }, [filters]);
-  // 當 animals 改變時重設頁面
-  const handleFilter = useCallback(() => {
+
+  const handleFilter = () => {
     setShowFilter(false);
-  }, []);
+  };
+
   // 重置篩選條件
-  const handleReset = useCallback(() => {
+  const handleReset = () => {
     setFilters({ area: "", type: "", sex: "" });
     setShowFilter(false);
-  }, []);
+  };
+
   // 分頁按鈕點擊處理
   const handlePageChange = useCallback((page) => {
     setCurrentPage(page);
@@ -71,27 +73,37 @@ const Data = () => {
       )}
       {/* 動物卡片區域 */}
       {loading ? (
-        <div className="flex items-center justify-center h-[60vh]">
-          <span className="loading loading-infinity loading-lg"></span>
+        <div className="flex flex-wrap justify-center items-center gap-3 m-3 pt-24 px-4">
+          {Array.from({ length: 12 }).map((_, idx) => (
+            <div key={idx} className="skeleton min-h-60 w-96"></div>
+          ))}
         </div>
       ) : error ? (
         <div className="text-center mt-10">資料載入失敗</div>
       ) : (
         <>
           <div className="flex flex-wrap pt-24 justify-center items-center px-4">
-            {currentAnimals.map((animal) => {
-              const isCollected = collects.some(
-                (item) => item.animal_id === animal.animal_id
-              );
-              return (
-                <AnimalCard
-                  key={animal.animal_id}
-                  animal={animal}
-                  isCollected={isCollected}
-                  from="data"
-                />
-              );
-            })}
+            {collectsLoading ? (
+              <>
+                <div className="skeleton min-h-60 w-96"></div>
+                <div className="skeleton min-h-60 w-96"></div>
+                <div className="skeleton min-h-60 w-96"></div>
+              </>
+            ) : (
+              currentAnimals.map((animal) => {
+                const isCollected =
+                  Array.isArray(collects) &&
+                  collects.some((item) => item.animal_id === animal.animal_id);
+                return (
+                  <AnimalCard
+                    key={animal.animal_id}
+                    animal={animal}
+                    isCollected={isCollected}
+                    from="data"
+                  />
+                );
+              })
+            )}
           </div>
 
           {/* 分頁按鈕 */}

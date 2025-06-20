@@ -3,7 +3,6 @@ import { useInView } from "react-intersection-observer";
 import { useNavigate } from "react-router";
 import { useFavorite } from "../hooks/useFavorite";
 
-// 性別顯示對照表
 const sexDisplay = {
   M: "公",
   F: "母",
@@ -12,22 +11,17 @@ const sexDisplay = {
 
 const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
   const { isCollected, toggleFavorite, isLoggedIn } = useFavorite(animal);
-  const [showLoginAlert, setShowLoginAlert] = React.useState(false);
   const navigate = useNavigate();
-  // 使用 Intersection Observer 來懶加載圖片
-  // 當卡片進入視窗時才載入圖片
   const { ref: inViewRef, inView } = useInView({
     triggerOnce: true,
     threshold: 0.1,
   });
 
-  // 處理圖片載入錯誤
   const handleImageError = (e) => {
     e.target.onerror = null;
     e.target.src = "/default.jpg";
   };
 
-  // 處理詳細資料按鈕點擊
   const handleDetailClick = () => {
     if (onViewDetail) {
       onViewDetail(animal);
@@ -37,21 +31,35 @@ const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
   };
 
   return (
-    <div ref={inViewRef} className="card bg-base-100 w-96 shadow-xl gap-3 m-3">
-      {inView && (
-        <div className="flex">
-          <figure className="w-1/2 flex-shrink-0">
+    <div
+      ref={inViewRef}
+      className="card bg-base-100 w-96 shadow-xl gap-3 m-3 relative min-h-60"
+    >
+      {!inView && (
+        <div className="flex flex-wrap justify-center items-centerpt-24 px-4">
+          <div className="skeleton min-h-60 w-96"></div>
+        </div>
+      )}
+
+      {/* 實際內容 - 使用透明度過渡效果 */}
+      <div
+        className={`transition-opacity duration-300 ${
+          inView ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <div className="flex min-h-60 w-80">
+          <figure className="w-1/2 flex-shrink-0 aspect-square">
             <img
               src={animal.album_file || "/default.jpg"}
               alt={animal.animal_Variety}
-              className="object-cover w-full h-full"
+              className="object-cover"
               loading="lazy"
               onError={handleImageError}
             />
           </figure>
-          <div className="card-body w-1/2 p-4">
-            <h2 className="card-title">{animal.animal_Variety}</h2>
-            <p>地區：{animal.animal_place}</p>
+          <div className="card-body w-1/2 p-4 overflow-hidden">
+            <h2 className="card-title truncate">{animal.animal_Variety}</h2>
+            <p className="truncate">地區：{animal.animal_place}</p>
             <p>性別：{sexDisplay[animal.animal_sex]}</p>
             <p>顏色：{animal.animal_colour}</p>
             <p>體型：{animal.animal_bodytype}</p>
@@ -59,16 +67,7 @@ const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
               <button
                 className="btn btn-ghost btn-sm"
                 disabled={!isLoggedIn}
-                onClick={async (e) => {
-                  console.log("isLoggedIn", isLoggedIn);
-                  if (!isLoggedIn) {
-                    e.preventDefault();
-                    setShowLoginAlert(true);
-                    setTimeout(() => setShowLoginAlert(false), 2000);
-                    return;
-                  }
-                  await toggleFavorite();
-                }}
+                onClick={toggleFavorite}
                 aria-label={isCollected ? "已收藏" : "收藏"}
               >
                 <svg
@@ -86,11 +85,6 @@ const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
                   />
                 </svg>
               </button>
-              {showLoginAlert && (
-                <div className="alert alert-error fixed top-4 left-1/2 -translate-x-1/2 z-50">
-                  請先登入
-                </div>
-              )}
               <button
                 className="btn btn-primary btn-sm"
                 onClick={handleDetailClick}
@@ -100,11 +94,11 @@ const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 });
 
 AnimalCard.displayName = "AnimalCard";
 
-export default AnimalCard;
+export default React.memo(AnimalCard);

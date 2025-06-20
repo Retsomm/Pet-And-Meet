@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { auth, googleProvider } from "../../firebase";
+import { auth, googleProvider, facebookProvider } from "../../firebase";
 import { signInWithPopup } from "firebase/auth";
 import useAuthStore from "../stores/useAuthStore";
 import React, { useState } from "react";
@@ -22,7 +22,7 @@ export default function Login() {
 
       setAlert({
         type: "success",
-        message: "登入成功！",
+        message: "Google 登入成功！",
       });
       setTimeout(() => {
         setAlert(null);
@@ -31,7 +31,35 @@ export default function Login() {
     } catch (error) {
       setAlert({
         type: "error",
-        message: "登入失敗：" + error.message,
+        message: "Google 登入失敗：" + error.message,
+      });
+      setTimeout(() => setAlert(null), 2000);
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, facebookProvider);
+      const user = result.user;
+
+      login({
+        avatarUrl: user.photoURL || "https://i.pravatar.cc/40",
+        displayName: user.displayName || "未命名",
+        email: user.email || "",
+      });
+
+      setAlert({
+        type: "success",
+        message: "Facebook 登入成功！",
+      });
+      setTimeout(() => {
+        setAlert(null);
+        navigate("/profile");
+      }, 2000);
+    } catch (error) {
+      setAlert({
+        type: "error",
+        message: "Facebook 登入失敗：" + error.message,
       });
       setTimeout(() => setAlert(null), 2000);
     }
@@ -82,6 +110,9 @@ export default function Login() {
       )}
       <button className="btn" onClick={handleGoogleLogin}>
         Login with Google
+      </button>
+      <button className="btn" onClick={handleFacebookLogin}>
+        Login with Facebook
       </button>
     </div>
   );

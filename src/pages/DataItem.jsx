@@ -59,6 +59,7 @@ export default function DataItem() {
   return (
     <div className="max-w-xl mx-auto mt-10 bg-base-100 shadow-lg rounded-lg p-6">
       <div className="mb-4">
+        {/* Object.entries(obj) 是將物件轉成可迴圈的 [[key, value]] 陣列 */}
         {Object.entries(animal).map(([key, value]) => (
           <div key={key} className="text-sm border-b py-1 flex">
             <span className="font-bold w-40">{keyMap[key] || key}：</span>

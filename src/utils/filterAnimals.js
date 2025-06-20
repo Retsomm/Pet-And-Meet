@@ -1,5 +1,5 @@
 export const filterAnimals = (animals, filters) => {
-  if (animals.length === 0) return [];
+  if (!Array.isArray(animals) || animals.length === 0) return [];
 
   const sexMap = {
     公: "M",
@@ -8,31 +8,31 @@ export const filterAnimals = (animals, filters) => {
   };
 
   const result = animals.filter((animal) => {
-    // 地區篩選
-    const areaMatch = 
-      filters.area === "" || animal.animal_place?.includes(filters.area);
+    const { area, type, sex } = filters;
 
-    // 種類篩選
-    let typeMatch = true;
-    if (filters.type !== "") {
-      if (filters.type === "貓") {
-        typeMatch = animal.animal_kind?.includes("貓");
-      } else if (filters.type === "狗") {
-        typeMatch = animal.animal_kind?.includes("狗");
-      } else if (filters.type === "其他") {
-        typeMatch = 
-          !animal.animal_kind?.includes("貓") && 
-          !animal.animal_kind?.includes("狗");
-      }
-    }
+    // 地區比對（若未設定則通過）
+    const areaMatch = !area || animal.animal_place?.includes(area);
 
-    // 性別篩選
-    const sexMatch = 
-      filters.sex === "" || animal.animal_sex === sexMap[filters.sex];
+    // 種類比對
+    const kind = animal.animal_kind || "";
+    const typeMatch =
+      !type ||
+      (type === "貓" && kind.includes("貓")) ||
+      (type === "狗" && kind.includes("狗")) ||
+      (type === "其他" && !kind.includes("貓") && !kind.includes("狗"));
+
+    // 性別比對
+    const sexMatch = !sex || animal.animal_sex === sexMap[sex];
 
     return areaMatch && typeMatch && sexMatch;
   });
-
-  console.log("篩選後資料數量:", result.length);
   return result;
 };
+// 1. sexMap 可以抽出到檔案外部共用（如果常用）
+// 這樣之後如果性別代碼或文字有更動，只需改一處。
+
+// 2. 篩選條件可以統一寫成布林邏輯，避免巢狀 if
+// 將 typeMatch 用同樣的邏輯寫成條件運算，會讓整體風格一致。
+
+// 3. includes 搭配非空字串的判斷可更簡潔
+// filters.area === "" || includes(...) 是 OK 的，但可以稍微簡化判斷。

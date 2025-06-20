@@ -11,7 +11,6 @@ export function useFavorite(animal) {
   useEffect(() => {
     const auth = getAuth();
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      console.log("onAuthStateChanged user:", user);
       setIsLoggedIn(!!user);
     });
     return () => unsubscribeAuth();

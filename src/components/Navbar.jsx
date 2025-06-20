@@ -8,7 +8,7 @@ export default function Navbar() {
   return (
     <div className="navbar bg-base-100 shadow-lg fixed top-0 l-0 z-50 max-sm:hidden">
       <div className="flex-1">
-        <a className="btn btn-ghost text-xl">毛孩相遇站</a>
+        <p className="btn btn-ghost text-xl">毛孩相遇站</p>
       </div>
       <div className="flex-none mx-10">
         <ul className="menu menu-horizontal px-1 items-center">

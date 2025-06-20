@@ -1,16 +1,20 @@
-//取得所有收藏（陣列）
 import { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
 import { ref, onValue } from "firebase/database";
 import { db } from "../../firebase";
 
 export function useUserCollects() {
-  const [collects, setCollects] = useState([]);
+  const [collects, setCollects] = useState(null); 
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const auth = getAuth();
     const user = auth.currentUser;
-    if (!user) return;
+    if (!user) {
+      setCollects([]);
+      setLoading(false);
+      return;
+    }
 
     const collectsRef = ref(db, `users/${user.uid}/collects`);
     const unsubscribe = onValue(collectsRef, (snapshot) => {
@@ -20,10 +24,11 @@ export function useUserCollects() {
       } else {
         setCollects([]);
       }
+      setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
-  return collects;
+  return { collects, loading };
 }
