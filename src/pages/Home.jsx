@@ -22,7 +22,7 @@ export default function Home() {
   return (
     <>
       {/* 主視覺區域 */}
-      <div className="hero min-h-96 bg-gradient-to-r rounded-box mb-8">
+      <div className="hero min-h-80 bg-gradient-to-r rounded-box">
         <div className="hero-content text-center">
           <div className="max-w-md">
             <p className="py-6">

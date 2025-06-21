@@ -4,14 +4,24 @@ import { filterAnimals } from "../utils/filterAnimals";
 import AnimalCard from "../components/AnimalCard";
 import { useUserCollects } from "../hooks/useUserCollects";
 import AnimalFilterMenu from "../components/AnimalFilterMenu";
+import AnimalSkeleton from "../components/AnimalSkeleton";
+
+// Skeleton UI 抽成組件
+const AnimalSkeletons = ({ count = 9 }) => (
+  <div className="flex flex-wrap justify-center items-center gap-3 m-3 px-4">
+    {Array.from({ length: count }).map((_, idx) => (
+      <AnimalSkeleton key={idx} />
+    ))}
+  </div>
+);
 
 const Data = () => {
   const { animals, loading, error } = useFetchAnimals();
   const [showFilter, setShowFilter] = useState(false);
   const [filters, setFilters] = useState({ area: "", type: "", sex: "" });
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20;
-  const { collects = [], loading: collectsLoading } = useUserCollects();
+  const itemsPerPage = 9;
+  const { collects = [] } = useUserCollects();
 
   // 篩選後的動物資料
   const filteredAnimals = useMemo(() => {
@@ -51,7 +61,7 @@ const Data = () => {
   return (
     <div className="relative min-h-screen sm:pt-10">
       {/* 篩選按鈕區域 */}
-      <div className="top-17 left-0 right-0 shadow-sm z-40 flex justify-center items-center">
+      <div className="top-17 left-0 right-0 shadow-sm z-40 flex justify-center items-center sm:mt-6">
         <div className="flex justify-center items-center py-4 px-4 w-screen">
           <button
             className="btn btn-outline bg-base-100"
@@ -73,37 +83,25 @@ const Data = () => {
       )}
       {/* 動物卡片區域 */}
       {loading ? (
-        <div className="flex flex-wrap justify-center items-center gap-3 m-3 pt-24 px-4">
-          {Array.from({ length: 12 }).map((_, idx) => (
-            <div key={idx} className="skeleton min-h-60 w-96"></div>
-          ))}
-        </div>
+        <AnimalSkeletons count={9} />
       ) : error ? (
         <div className="text-center mt-10">資料載入失敗</div>
       ) : (
         <>
-          <div className="flex flex-wrap pt-24 justify-center items-center px-4">
-            {collectsLoading ? (
-              <>
-                <div className="skeleton min-h-60 w-96"></div>
-                <div className="skeleton min-h-60 w-96"></div>
-                <div className="skeleton min-h-60 w-96"></div>
-              </>
-            ) : (
-              currentAnimals.map((animal) => {
-                const isCollected =
-                  Array.isArray(collects) &&
-                  collects.some((item) => item.animal_id === animal.animal_id);
-                return (
-                  <AnimalCard
-                    key={animal.animal_id}
-                    animal={animal}
-                    isCollected={isCollected}
-                    from="data"
-                  />
-                );
-              })
-            )}
+          <div className="flex flex-wrap justify-center items-center px-4">
+            {currentAnimals.map((animal) => {
+              const isCollected =
+                Array.isArray(collects) &&
+                collects.some((item) => item.animal_id === animal.animal_id);
+              return (
+                <AnimalCard
+                  key={animal.animal_id}
+                  animal={animal}
+                  isCollected={isCollected}
+                  from="data"
+                />
+              );
+            })}
           </div>
 
           {/* 分頁按鈕 */}

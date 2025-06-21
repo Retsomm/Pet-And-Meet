@@ -40,7 +40,7 @@ export default function DataItem() {
   const navigate = useNavigate();
   const { animals, loading, error } = useFetchAnimals();
   const [showAlert, setShowAlert] = React.useState(false);
-
+  const [alertMsg, setAlertMsg] = React.useState("");
   const animal = React.useMemo(
     () => animals.find((a) => String(a.animal_id) === id),
     [animals, id]
@@ -86,9 +86,20 @@ export default function DataItem() {
           isCollected ? "btn-error" : "btn-warning"
         }`}
         onClick={async () => {
-          await toggleFavorite();
-          setShowAlert(true);
-          setTimeout(() => setShowAlert(false), 2000);
+          try {
+            const result = await toggleFavorite();
+            if (result === false) {
+              setAlertMsg("請先登入才能收藏");
+            } else {
+              setAlertMsg(isCollected ? "已取消收藏" : "已收藏");
+            }
+            setShowAlert(true);
+            setTimeout(() => setShowAlert(false), 2000);
+          } catch {
+            setAlertMsg("請先登入才能收藏");
+            setShowAlert(true);
+            setTimeout(() => setShowAlert(false), 2000);
+          }
         }}
       >
         {isCollected ? "取消收藏" : "收藏這隻毛孩"}
@@ -127,7 +138,7 @@ export default function DataItem() {
                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span>{isCollected ? "已收藏" : "已取消收藏"}</span>
+            <span>{alertMsg}</span>
           </div>
         </div>
       )}

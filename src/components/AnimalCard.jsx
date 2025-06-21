@@ -2,6 +2,7 @@ import React from "react";
 import { useInView } from "react-intersection-observer";
 import { useNavigate } from "react-router";
 import { useFavorite } from "../hooks/useFavorite";
+import AnimalSkeleton from "./AnimalSkeleton"; // 新增這行
 
 const sexDisplay = {
   M: "公",
@@ -35,22 +36,16 @@ const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
       ref={inViewRef}
       className="card bg-base-100 w-96 shadow-xl gap-3 m-3 relative min-h-60"
     >
-      {!inView && (
-        <div className="flex flex-wrap justify-center items-centerpt-24 px-4">
-          <div className="skeleton min-h-60 w-96"></div>
-        </div>
-      )}
-
-      {/* 實際內容 - 使用透明度過渡效果 */}
+      {!inView && <AnimalSkeleton />}
       <div
         className={`transition-opacity duration-300 ${
           inView ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       >
-        <div className="flex min-h-60 w-80">
+        <div className="flex min-h-60 w-96">
           <figure className="w-1/2 flex-shrink-0 aspect-square">
             <img
-              src={animal.album_file || "/default.jpg"}
+              src={animal.album_file || "/default.webp"}
               alt={animal.animal_Variety}
               className="object-cover"
               loading="lazy"
@@ -59,11 +54,11 @@ const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
           </figure>
           <div className="card-body w-1/2 p-4 overflow-hidden">
             <h2 className="card-title truncate">{animal.animal_Variety}</h2>
-            <p className="truncate">地區：{animal.animal_place}</p>
+            <p className="truncate">地區：{animal.animal_place?.slice(0, 3)}</p>
             <p>性別：{sexDisplay[animal.animal_sex]}</p>
             <p>顏色：{animal.animal_colour}</p>
             <p>體型：{animal.animal_bodytype}</p>
-            <div className="card-actions justify-end mt-2">
+            <div className="card-actions justify-end mt-2 flex-nowrap">
               <button
                 className="btn btn-ghost btn-sm"
                 disabled={!isLoggedIn}
