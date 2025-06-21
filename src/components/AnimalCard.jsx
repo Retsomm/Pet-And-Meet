@@ -2,7 +2,8 @@ import React from "react";
 import { useInView } from "react-intersection-observer";
 import { useNavigate } from "react-router";
 import { useFavorite } from "../hooks/useFavorite";
-import AnimalSkeleton from "./AnimalSkeleton"; // 新增這行
+import AnimalSkeleton from "./AnimalSkeleton";
+import { useWebpImage } from "../hooks/useWebpImage";
 
 const sexDisplay = {
   M: "公",
@@ -17,7 +18,7 @@ const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
     triggerOnce: true,
     threshold: 0.1,
   });
-
+  const imgSrc = useWebpImage(animal.album_file);
   const handleImageError = (e) => {
     e.target.onerror = null;
     e.target.src = "/default.jpg";
@@ -45,7 +46,7 @@ const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
         <div className="flex min-h-60 w-96">
           <figure className="w-1/2 flex-shrink-0 aspect-square">
             <img
-              src={animal.album_file || "/default.webp"}
+              src={imgSrc || "/default.webp"}
               alt={animal.animal_Variety}
               className="object-cover"
               loading="lazy"
