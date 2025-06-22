@@ -1,10 +1,27 @@
 import { useState, useEffect } from "react";
+import { openDB } from "idb";
 
-// 修正：需要加上 /animals 路徑
 const API_URL = "https://us-central1-animal-adoption-vite-app.cloudfunctions.net/api/animals";
-const CACHE_KEY = "animals";
-const CACHE_EXPIRE_KEY = "animals_expire";
+const DB_NAME = "animal-cache";
+const STORE_NAME = "animals";
 const CACHE_DURATION = 1000 * 60 * 60 * 24; // 24 小時
+
+async function getCache() {
+  const db = await openDB(DB_NAME, 1, {
+    upgrade(db) {
+      db.createObjectStore(STORE_NAME);
+    },
+  });
+  const cache = await db.get(STORE_NAME, "data");
+  const expire = await db.get(STORE_NAME, "expire");
+  return { cache, expire };
+}
+
+async function setCache(data, expire) {
+  const db = await openDB(DB_NAME, 1);
+  await db.put(STORE_NAME, data, "data");
+  await db.put(STORE_NAME, expire, "expire");
+}
 
 export function useFetchAnimals() {
   const [animals, setAnimals] = useState([]);
@@ -16,13 +33,12 @@ export function useFetchAnimals() {
 
     const fetchAnimals = async () => {
       try {
-        // 檢查 localStorage 是否有快取且未過期
-        const cache = localStorage.getItem(CACHE_KEY);
-        const expire = localStorage.getItem(CACHE_EXPIRE_KEY);
+        // 檢查 IndexedDB 是否有快取且未過期
+        const { cache, expire } = await getCache();
         const now = Date.now();
 
         if (cache && expire && now < Number(expire)) {
-          setAnimals(JSON.parse(cache));
+          setAnimals(cache);
           setLoading(false);
           return;
         }
@@ -34,16 +50,14 @@ export function useFetchAnimals() {
         const data = await response.json();
 
         // 儲存快取 + 過期時間
-        // localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-        // localStorage.setItem(CACHE_EXPIRE_KEY, String(now + CACHE_DURATION));
-        console.log("API data:", data, Array.isArray(data), data.length);
+        await setCache(data, String(now + CACHE_DURATION));
         setAnimals(data);
       } catch (err) {
-  if (err.name !== "AbortError") {
-        setError(err);
-        console.error("Fetch error:", err);
-      }
-    } finally {
+        if (err.name !== "AbortError") {
+          setError(err);
+          console.error("Fetch error:", err);
+        }
+      } finally {
         setLoading(false);
       }
     };

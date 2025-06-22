@@ -49,8 +49,7 @@ export const api = https.onRequest(async (req, res) => {
 
       const filteredData = data
         .filter(item => !!item.album_file)
-        .slice(0, 100);
-        // .map(item => item);
+        .map(item => item);
 
       cachedData = filteredData;
       cachedTime = now;
