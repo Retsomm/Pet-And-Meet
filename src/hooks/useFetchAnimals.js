@@ -34,14 +34,16 @@ export function useFetchAnimals() {
         const data = await response.json();
 
         // 儲存快取 + 過期時間
-        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-        localStorage.setItem(CACHE_EXPIRE_KEY, String(now + CACHE_DURATION));
+        // localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+        // localStorage.setItem(CACHE_EXPIRE_KEY, String(now + CACHE_DURATION));
+        console.log("API data:", data, Array.isArray(data), data.length);
         setAnimals(data);
       } catch (err) {
-        if (err.name !== "AbortError") {
-          setError(err);
-        }
-      } finally {
+  if (err.name !== "AbortError") {
+        setError(err);
+        console.error("Fetch error:", err);
+      }
+    } finally {
         setLoading(false);
       }
     };

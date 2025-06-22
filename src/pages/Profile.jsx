@@ -17,7 +17,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="flex flex-col items-center mt-10">
+    <div className="flex flex-col items-center h-screen justify-center">
       <img
         src={user.avatarUrl || "https://i.pravatar.cc/100"}
         alt="User Avatar"

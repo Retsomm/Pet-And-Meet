@@ -20,7 +20,11 @@ export function useUserCollects() {
     const unsubscribe = onValue(collectsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        setCollects(Object.values(data));
+        const collectsWithId = Object.values(data).map(item => ({
+          ...item,
+          id: item.animal_id,
+        }));
+        setCollects(collectsWithId);
       } else {
         setCollects([]);
       }

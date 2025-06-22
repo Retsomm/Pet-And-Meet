@@ -6,9 +6,9 @@ export default function Navbar() {
   const { isLoggedIn, user } = useAuthStore();
 
   return (
-    <div className="navbar bg-base-100 shadow-lg fixed top-0 l-0 z-50 max-sm:hidden">
-      <div className="flex-1">
-        <p className="btn btn-ghost text-xl">毛孩相遇站</p>
+    <div className="navbar bg-base-100 shadow-lg fixed top-0 l-0 z-50 max-sm:hidden p-0">
+      <div className="flex-1 mx-10">
+        <img src="/PetIcon.webp" alt="PetIcon" className="w-12 h-auto" />
       </div>
       <div className="flex-none mx-10">
         <ul className="menu menu-horizontal px-1 items-center">

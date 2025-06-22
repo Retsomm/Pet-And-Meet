@@ -1,13 +1,13 @@
 import { useNavigate } from "react-router";
-import { auth, googleProvider, facebookProvider } from "../../firebase";
+import { auth, googleProvider } from "../../firebase";
 import { signInWithPopup } from "firebase/auth";
 import useAuthStore from "../stores/useAuthStore";
-import React, { useState } from "react";
+import { useState } from "react";
 
 export default function Login() {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
-  const [alert, setAlert] = useState(null); // { type: "success" | "error", message: string }
+  const [alert, setAlert] = useState(null);
 
   const handleGoogleLogin = async () => {
     try {
@@ -37,36 +37,36 @@ export default function Login() {
     }
   };
 
-  const handleFacebookLogin = async () => {
-    try {
-      const result = await signInWithPopup(auth, facebookProvider);
-      const user = result.user;
+  // const handleFacebookLogin = async () => {
+  //   try {
+  //     const result = await signInWithPopup(auth, facebookProvider);
+  //     const user = result.user;
 
-      login({
-        avatarUrl: user.photoURL || "https://i.pravatar.cc/40",
-        displayName: user.displayName || "未命名",
-        email: user.email || "",
-      });
+  //     login({
+  //       avatarUrl: user.photoURL || "https://i.pravatar.cc/40",
+  //       displayName: user.displayName || "未命名",
+  //       email: user.email || "",
+  //     });
 
-      setAlert({
-        type: "success",
-        message: "Facebook 登入成功！",
-      });
-      setTimeout(() => {
-        setAlert(null);
-        navigate("/profile");
-      }, 2000);
-    } catch (error) {
-      setAlert({
-        type: "error",
-        message: "Facebook 登入失敗：" + error.message,
-      });
-      setTimeout(() => setAlert(null), 2000);
-    }
-  };
+  //     setAlert({
+  //       type: "success",
+  //       message: "Facebook 登入成功！",
+  //     });
+  //     setTimeout(() => {
+  //       setAlert(null);
+  //       navigate("/profile");
+  //     }, 2000);
+  //   } catch (error) {
+  //     setAlert({
+  //       type: "error",
+  //       message: "Facebook 登入失敗：" + error.message,
+  //     });
+  //     setTimeout(() => setAlert(null), 2000);
+  //   }
+  // };
 
   return (
-    <div className="w-10/12 flex flex-col items-center justify-center gap-4 mx-auto my-10">
+    <div className="flex flex-col items-center h-screen justify-center">
       {alert && (
         <div
           className={`fixed inset-0 flex items-center justify-center z-50`}
@@ -111,9 +111,9 @@ export default function Login() {
       <button className="btn" onClick={handleGoogleLogin}>
         Login with Google
       </button>
-      <button className="btn" onClick={handleFacebookLogin}>
+      {/* <button className="btn" onClick={handleFacebookLogin}>
         Login with Facebook
-      </button>
+      </button> */}
     </div>
   );
 }

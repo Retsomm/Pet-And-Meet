@@ -2,15 +2,22 @@ import { useMemo } from "react";
 import { useFetchAnimals } from "../hooks/useFetchAnimals";
 import AnimalCard from "../components/AnimalCard";
 import { useNavigate } from "react-router";
+import AnimalSkeleton from "../components/AnimalSkeleton";
 function getRandomElementsFromArray(array, count) {
-  const shuffled = [...array]; 
+  const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; // 交換元素
   }
   return shuffled.slice(0, Math.min(count, shuffled.length));
 }
-
+const AnimalSkeletons = ({ count = 3 }) => (
+  <div className="flex flex-wrap justify-center items-center gap-3 m-3 px-4">
+    {Array.from({ length: count }).map((_, idx) => (
+      <AnimalSkeleton key={idx} />
+    ))}
+  </div>
+);
 export default function Home() {
   const { animals, loading, error } = useFetchAnimals();
   const navigate = useNavigate();
@@ -22,13 +29,10 @@ export default function Home() {
   return (
     <>
       {/* 主視覺區域 */}
-      <div className="hero min-h-80 bg-gradient-to-r rounded-box">
+      <div className="hero sm:min-h-80 bg-gradient-to-r rounded-box">
         <div className="hero-content text-center">
           <div className="max-w-md">
-            <p className="py-6">
-              每一隻毛孩都值得被愛，每一個家庭都值得擁有溫暖的陪伴。
-              讓我們一起為牠們找到永遠的家！
-            </p>
+            <p className="py-6">遇見生命中的小夥伴，讓愛與陪伴延續</p>
             <button className="btn" onClick={() => navigate("/data")}>
               開始尋找毛孩
             </button>
@@ -110,11 +114,7 @@ export default function Home() {
       <div className="mb-8 flex flex-col justify-center">
         <h2 className="text-3xl font-bold mb-6 text-center">今日毛孩</h2>
         {loading ? (
-          <div className="flex flex-wrap gap-4 justify-center">
-            <div className="skeleton w-96 h-48 rounded-lg"></div>
-            <div className="skeleton w-96 h-48 rounded-lg"></div>
-            <div className="skeleton w-96 h-48 rounded-lg"></div>
-          </div>
+          <AnimalSkeletons count={3} />
         ) : error ? (
           <div className="text-center text-red-500">資料載入失敗</div>
         ) : (
@@ -124,9 +124,6 @@ export default function Home() {
             ))}
           </div>
         )}
-      </div>
-      <div>
-        每一隻毛孩都值得被愛，每一個家庭都值得擁有溫暖的陪伴。讓我們一起為牠們找到永遠的家！
       </div>
     </>
   );

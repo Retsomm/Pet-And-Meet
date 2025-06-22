@@ -11,12 +11,15 @@ const CACHE_DURATION = 1000 * 60 * 60 * 6; // 6小時快取
 function setCorsHeaders(res) {
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.set('Access-Control-Allow-Headers', 'Content-Type');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // res.set('Access-Control-Allow-Credentials', 'true'); // 若有需要可開啟
 }
 
 export const api = https.onRequest(async (req, res) => {
   setCorsHeaders(res);
   if (req.method === 'OPTIONS') {
+    // 明確回應 header
+    setCorsHeaders(res);
     res.status(204).send('');
     return;
   }
@@ -44,10 +47,10 @@ export const api = https.onRequest(async (req, res) => {
       const data = await response.json();
       console.log('Fetched data:', Array.isArray(data), data.length);
 
-
       const filteredData = data
         .filter(item => !!item.album_file)
-        .map(item => item);
+        .slice(0, 100);
+        // .map(item => item);
 
       cachedData = filteredData;
       cachedTime = now;
