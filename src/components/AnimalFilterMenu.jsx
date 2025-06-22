@@ -32,7 +32,7 @@ const AnimalFilterMenu = ({
   onReset,
   onClose,
 }) => (
-  <div className="fixed w-screen h-screen top-0 left-0 z-50 p-8 bg-base-100">
+  <div className="fixed w-screen h-screen top-0 left-0 z-50 p-8 bg-base-100 overflow-y-auto">
     <div className="flex justify-between items-center mb-8">
       <h2 className="text-2xl font-bold">篩選條件</h2>
       <button className="text-2xl" onClick={onClose}>
