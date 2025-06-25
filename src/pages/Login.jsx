@@ -36,35 +36,6 @@ export default function Login() {
       setTimeout(() => setAlert(null), 2000);
     }
   };
-
-  // const handleFacebookLogin = async () => {
-  //   try {
-  //     const result = await signInWithPopup(auth, facebookProvider);
-  //     const user = result.user;
-
-  //     login({
-  //       avatarUrl: user.photoURL || "https://i.pravatar.cc/40",
-  //       displayName: user.displayName || "未命名",
-  //       email: user.email || "",
-  //     });
-
-  //     setAlert({
-  //       type: "success",
-  //       message: "Facebook 登入成功！",
-  //     });
-  //     setTimeout(() => {
-  //       setAlert(null);
-  //       navigate("/profile");
-  //     }, 2000);
-  //   } catch (error) {
-  //     setAlert({
-  //       type: "error",
-  //       message: "Facebook 登入失敗：" + error.message,
-  //     });
-  //     setTimeout(() => setAlert(null), 2000);
-  //   }
-  // };
-
   return (
     <div className="flex flex-col items-center h-screen justify-center">
       {alert && (
@@ -111,9 +82,6 @@ export default function Login() {
       <button className="btn" onClick={handleGoogleLogin}>
         Login with Google
       </button>
-      {/* <button className="btn" onClick={handleFacebookLogin}>
-        Login with Facebook
-      </button> */}
     </div>
   );
 }

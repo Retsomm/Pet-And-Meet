@@ -1,5 +1,3 @@
-import React from "react";
-
 const AnimalSkeleton = () => (
   <div className="card bg-base-100 shadow-xl gap-3 m-3 w-96 min-h-60">
     <div className="flex">

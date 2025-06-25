@@ -3,31 +3,45 @@ import { useInView } from "react-intersection-observer";
 import { useNavigate } from "react-router";
 import { useFavorite } from "../hooks/useFavorite";
 import AnimalSkeleton from "./AnimalSkeleton";
-import { useWebpImage } from "../hooks/useWebpImage";
 
+// 性別顯示對照表
 const sexDisplay = {
   M: "公",
   F: "母",
   N: "未知",
 };
 
+/**
+ * 動物卡片元件
+ * @param {Object} props
+ * @param {Object} props.animal - 動物資料物件
+ * @param {Function} [props.onViewDetail] - 點擊詳細資料時的回呼
+ * @param {string} [props.from="data"] - 來源標記（用於路由狀態）
+ */
 const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
+  // 收藏 hook，取得收藏狀態與切換函式
   const { isCollected, toggleFavorite, isLoggedIn } = useFavorite(animal);
+  // 路由導覽 hook
   const navigate = useNavigate();
+  // Intersection Observer hook，判斷卡片是否進入視窗
   const { ref: inViewRef, inView } = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
+    triggerOnce: true, // 只觸發一次
+    threshold: 0.1, // 進入 10% 即觸發
   });
-  const imgSrc = useWebpImage(animal.album_file);
+
+  // 圖片載入失敗時顯示預設圖
   const handleImageError = (e) => {
     e.target.onerror = null;
-    e.target.src = "/default.jpg";
+    e.target.src = "/default.webp";
   };
 
+  // 點擊詳細資料按鈕時的處理
   const handleDetailClick = () => {
     if (onViewDetail) {
+      // 若有傳入 onViewDetail，則呼叫
       onViewDetail(animal);
     } else {
+      // 否則導向詳細頁，並帶上來源資訊
       navigate(`/animal/${animal.animal_id}`, { state: { from } });
     }
   };
@@ -37,6 +51,7 @@ const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
       ref={inViewRef}
       className="card bg-base-100 w-96 shadow-xl gap-3 m-3 relative min-h-60"
     >
+      {/* 若尚未進入視窗則顯示骨架畫面 */}
       {!inView && <AnimalSkeleton />}
       <div
         className={`transition-opacity duration-300 ${
@@ -44,22 +59,26 @@ const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
         }`}
       >
         <div className="flex min-h-60 w-96">
+          {/* 動物圖片區塊 */}
           <figure className="w-1/2 flex-shrink-0 aspect-square">
             <img
-              src={imgSrc || "/default.webp"}
+              src={animal.album_file || "/default.webp"}
               alt={animal.animal_Variety}
               className="object-cover"
               loading="lazy"
               onError={handleImageError}
             />
           </figure>
+          {/* 動物資訊區塊 */}
           <div className="card-body w-1/2 p-4 overflow-hidden">
             <h2 className="card-title truncate">{animal.animal_Variety}</h2>
             <p className="truncate">地區：{animal.animal_place?.slice(0, 3)}</p>
             <p>性別：{sexDisplay[animal.animal_sex]}</p>
             <p>顏色：{animal.animal_colour}</p>
             <p>體型：{animal.animal_bodytype}</p>
+            {/* 按鈕區塊 */}
             <div className="card-actions justify-end mt-2 flex-nowrap">
+              {/* 收藏按鈕 */}
               <button
                 className="btn btn-ghost btn-sm"
                 disabled={!isLoggedIn}
@@ -81,6 +100,7 @@ const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
                   />
                 </svg>
               </button>
+              {/* 詳細資料按鈕 */}
               <button
                 className="btn btn-primary btn-sm"
                 onClick={handleDetailClick}
@@ -95,6 +115,8 @@ const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
   );
 });
 
+// 設定 displayName 方便除錯
 AnimalCard.displayName = "AnimalCard";
 
+// 導出元件（再次 memo 包裝避免重複渲染）
 export default React.memo(AnimalCard);

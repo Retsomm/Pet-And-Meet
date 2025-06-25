@@ -4,11 +4,16 @@ import AnimalCard from "../components/AnimalCard";
 import { useNavigate } from "react-router";
 import AnimalSkeleton from "../components/AnimalSkeleton";
 function getRandomElementsFromArray(array, count) {
+  // 複製原始陣列，避免直接修改傳入的 array
   const shuffled = [...array];
+  // 使用 Fisher-Yates 洗牌演算法隨機打亂陣列順序
   for (let i = shuffled.length - 1; i > 0; i--) {
+    // 隨機取得一個索引 j，範圍為 0 到 i（包含 i）
     const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; // 交換元素
+    // 將當前元素 shuffled[i] 與隨機選中的 shuffled[j] 交換
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
+  // 回傳打亂後的前 count 個元素（若陣列長度小於 count，則回傳全部）
   return shuffled.slice(0, Math.min(count, shuffled.length));
 }
 const AnimalSkeletons = ({ count = 3 }) => (

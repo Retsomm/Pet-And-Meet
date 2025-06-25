@@ -25,6 +25,34 @@ const AREAS = [
 const TYPES = ["全部", "貓", "狗", "其他"];
 const SEXES = ["全部", "公", "母", "未知"];
 
+// 抽出共用的按鈕群組元件
+const FilterButtonGroup = ({
+  label,
+  options,
+  value,
+  onChange,
+  className = "",
+}) => (
+  <div className={`mb-6 ${className}`}>
+    <div className="mb-2 font-bold">{label}</div>
+    <div className="flex flex-wrap gap-2">
+      {options.map((option) => (
+        <button
+          key={option}
+          className={`btn btn-outline btn-sm ${
+            value === option || (value === "" && option === "全部")
+              ? "btn-primary"
+              : ""
+          }`}
+          onClick={() => onChange(option === "全部" ? "" : option)}
+        >
+          {option}
+        </button>
+      ))}
+    </div>
+  </div>
+);
+
 const AnimalFilterMenu = ({
   filters,
   setFilters,
@@ -39,66 +67,26 @@ const AnimalFilterMenu = ({
         ×
       </button>
     </div>
-    <div className="mb-6">
-      <div className="mb-2 font-bold">地區</div>
-      <div className="flex flex-wrap gap-2">
-        {AREAS.map((area) => (
-          <button
-            key={area}
-            className={`btn btn-outline btn-sm ${
-              filters.area === area || (filters.area === "" && area === "全部")
-                ? "btn-primary"
-                : ""
-            }`}
-            onClick={() =>
-              setFilters((f) => ({ ...f, area: area === "全部" ? "" : area }))
-            }
-          >
-            {area}
-          </button>
-        ))}
-      </div>
-    </div>
-    <div className="mb-6">
-      <div className="mb-2 font-bold">種類</div>
-      <div className="flex gap-2">
-        {TYPES.map((type) => (
-          <button
-            key={type}
-            className={`btn btn-outline btn-sm ${
-              filters.type === type || (filters.type === "" && type === "全部")
-                ? "btn-primary"
-                : ""
-            }`}
-            onClick={() =>
-              setFilters((f) => ({ ...f, type: type === "全部" ? "" : type }))
-            }
-          >
-            {type}
-          </button>
-        ))}
-      </div>
-    </div>
-    <div className="mb-6">
-      <div className="mb-2 font-bold">性別</div>
-      <div className="flex gap-2">
-        {SEXES.map((sex) => (
-          <button
-            key={sex}
-            className={`btn btn-outline btn-sm ${
-              filters.sex === sex || (filters.sex === "" && sex === "全部")
-                ? "btn-primary"
-                : ""
-            }`}
-            onClick={() =>
-              setFilters((f) => ({ ...f, sex: sex === "全部" ? "" : sex }))
-            }
-          >
-            {sex}
-          </button>
-        ))}
-      </div>
-    </div>
+    <FilterButtonGroup
+      label="地區"
+      options={AREAS}
+      value={filters.area}
+      onChange={(area) => setFilters((f) => ({ ...f, area }))}
+    />
+    <FilterButtonGroup
+      label="種類"
+      options={TYPES}
+      value={filters.type}
+      onChange={(type) => setFilters((f) => ({ ...f, type }))}
+      className="flex-nowrap"
+    />
+    <FilterButtonGroup
+      label="性別"
+      options={SEXES}
+      value={filters.sex}
+      onChange={(sex) => setFilters((f) => ({ ...f, sex }))}
+      className="flex-nowrap"
+    />
     <div className="flex gap-4 mt-12">
       <button className="btn btn-outline flex-1" onClick={onReset}>
         重置
