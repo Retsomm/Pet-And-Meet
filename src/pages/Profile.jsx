@@ -26,10 +26,6 @@ export default function Profile() {
       <h2 className="text-2xl font-bold mt-4">{user.displayName}</h2>
       <p className="mt-2">{user.email}</p>
 
-      {/* 示範頁面連結 */}
-      <Link to="/image-demo" className="btn btn-outline mt-4">
-        🖼️ 查看圖片優化示範
-      </Link>
 
       <button
         className="btn btn-error mt-6"
