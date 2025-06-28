@@ -3,14 +3,24 @@ import { useUserCollects } from "../hooks/useUserCollects";
 import useAuthStore from "../stores/useAuthStore";
 import { useFetchAnimals } from "../hooks/useFetchAnimals";
 import { useSyncFavoritesWithAPI } from "../hooks/useSyncFavoritesWithAPI";
+import { useEffect, useRef } from "react";
 
 export default function Collect() {
   const { isLoggedIn } = useAuthStore();
   const { collects, loading } = useUserCollects();
-  const { animals, loading: animalsLoading } = useFetchAnimals();
+  const { animals, loading: animalsLoading, refetch } = useFetchAnimals();
+  const hasRefetched = useRef(false);
+
+  // 當進入收藏頁面時，強制刷新動物資料以確保同步準確性（只執行一次）
+  useEffect(() => {
+    if (isLoggedIn && !hasRefetched.current) {
+      hasRefetched.current = true;
+      refetch();
+    }
+  }, [isLoggedIn, refetch]);
 
   // 同步移除不存在於 API 的收藏
-  useSyncFavoritesWithAPI(animals);
+  useSyncFavoritesWithAPI(animals, animalsLoading);
 
   // 只顯示 API 仍存在的收藏
   const validCollects =

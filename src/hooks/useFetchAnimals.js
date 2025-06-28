@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { openDB } from "idb";
 
 // API 端點
@@ -41,7 +41,7 @@ async function setCache(data, expire) {
 
 /**
  * React Hook：取得動物資料，支援快取
- * @returns {Object} { animals, loading, error }
+ * @returns {Object} { animals, loading, error, refetch }
  */
 export function useFetchAnimals() {
   // 動物資料狀態
@@ -50,6 +50,8 @@ export function useFetchAnimals() {
   const [loading, setLoading] = useState(true);
   // 錯誤狀態
   const [error, setError] = useState(null);
+  // 強制刷新觸發器
+  const [forceRefresh, setForceRefresh] = useState(0);
 
   useEffect(() => {
     // 建立 AbortController 以便中止 fetch
@@ -60,12 +62,12 @@ export function useFetchAnimals() {
      */
     const fetchAnimals = async () => {
       try {
-        // 先檢查 IndexedDB 是否有快取且未過期
+        // 先檢查 IndexedDB 是否有快取且未過期（除非強制刷新）
         const { cache, expire } = await getCache();
         const now = Date.now();
 
-        // 若快取存在且未過期，直接使用快取
-        if (cache && expire && now < Number(expire)) {
+        // 若快取存在且未過期，且非強制刷新，直接使用快取
+        if (cache && expire && now < Number(expire) && forceRefresh === 0) {
           setAnimals(cache);
           setLoading(false);
           return;
@@ -98,8 +100,15 @@ export function useFetchAnimals() {
     return () => {
       controller.abort();
     };
+  }, [forceRefresh]);
+
+  // 強制刷新函數 - 使用 useCallback 避免無限循環
+  const refetch = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    setForceRefresh(prev => prev + 1);
   }, []);
 
-  // 回傳動物資料、載入狀態、錯誤
-  return { animals, loading, error };
+  // 回傳動物資料、載入狀態、錯誤、刷新函數
+  return { animals, loading, error, refetch };
 }

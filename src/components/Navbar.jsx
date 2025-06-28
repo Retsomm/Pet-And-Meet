@@ -27,6 +27,7 @@ export default function Navbar() {
               <p className="text-lg font-bold">收藏</p>
             </Link>
           </li>
+          
           <li>
             {isLoggedIn ? (
               <Link to="/profile" className="navLink" aria-label="個人資料">

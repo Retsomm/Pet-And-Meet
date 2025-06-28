@@ -2,6 +2,7 @@ import React from "react";
 import { useInView } from "react-intersection-observer";
 import { useNavigate } from "react-router";
 import { useFavorite } from "../hooks/useFavorite";
+import { AnimalCardImage } from "./OptimizedImage";
 import AnimalSkeleton from "./AnimalSkeleton";
 
 // 性別顯示對照表
@@ -61,10 +62,10 @@ const AnimalCard = React.memo(({ animal, onViewDetail, from = "data" }) => {
         <div className="flex min-h-60 w-96">
           {/* 動物圖片區塊 */}
           <figure className="w-1/2 flex-shrink-0 aspect-square">
-            <img
-              src={animal.album_file || "/default.webp"}
+            <AnimalCardImage
+              src={animal.album_file}
               alt={animal.animal_Variety}
-              className="object-cover"
+              className="w-full h-full"
               loading="lazy"
               onError={handleImageError}
             />

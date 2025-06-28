@@ -7,9 +7,11 @@ import Profile from "./pages/Profile";
 import DataItem from "./pages/DataItem";
 import Collect from "./pages/Collect";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ScrollToTop from "./components/ScrollToTop";
 import { BrowserRouter, Routes, Route } from "react-router";
 import useAuthStore from "./stores/useAuthStore";
 import { useEffect } from "react";
+
 function App() {
   const { isLoading, init } = useAuthStore();
 
@@ -21,6 +23,7 @@ function App() {
   }
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route path="/" element={<Home />} />

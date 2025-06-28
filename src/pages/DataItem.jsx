@@ -2,6 +2,7 @@ import React from "react";
 import { useLocation, useParams, useNavigate } from "react-router";
 import { useFetchAnimals } from "../hooks/useFetchAnimals";
 import { useFavorite } from "../hooks/useFavorite";
+import { AnimalDetailImage } from "../components/OptimizedImage";
 
 const keyMap = {
   animal_id: "動物流水編號",
@@ -65,7 +66,13 @@ export default function DataItem() {
             <span className="font-bold w-40">{keyMap[key] || key}：</span>
             <span className="flex-1 break-all">
               {key === "album_file" ? (
-                <img src={value} alt="動物圖片" className="max-h-32" />
+                <div className="relative w-auto h-full inline-block">
+                  <AnimalDetailImage
+                    src={value}
+                    alt="動物圖片"
+                    className="w-full h-full"
+                  />
+                </div>
               ) : (
                 String(value)
               )}
