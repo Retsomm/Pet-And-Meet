@@ -42,5 +42,5 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ANIMAL_ADOPTION_VITE_APP_FB2F5 }}'
-          projectId: animal-adoption-vite-app-fb2f5
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ANIMAL_ADOPTION_VITE_APP }}'
+          projectId: animal-adoption-vite-app
