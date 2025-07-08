@@ -60,6 +60,19 @@ export function extractPublicIdFromUrl(url) {
   }
 }
 
+// Cache to avoid repeated logging for the same URLs
+const urlSuitabilityCache = new Map();
+const MAX_CACHE_SIZE = 100;
+
+// Clean cache when it gets too large
+function cleanCache(cache) {
+  if (cache.size > MAX_CACHE_SIZE) {
+    // Remove oldest entries (first 20 entries)
+    const keysToDelete = Array.from(cache.keys()).slice(0, 20);
+    keysToDelete.forEach(key => cache.delete(key));
+  }
+}
+
 /**
  * 檢查 URL 是否適合 Cloudinary 處理
  * @param {string} url - 圖片 URL
@@ -68,21 +81,36 @@ export function extractPublicIdFromUrl(url) {
 function isUrlSuitableForCloudinary(url) {
   if (!url) return false;
   
+  // Check cache first to avoid repeated processing and logging
+  if (urlSuitabilityCache.has(url)) {
+    return urlSuitabilityCache.get(url);
+  }
+  
+  let isSuitable = true;
+  
   // 檢查是否已經是 Cloudinary URL
   if (url.includes('cloudinary.com')) {
-    console.log('Skipping Cloudinary URL:', url);
-    return false;
+    if (import.meta.env.DEV && import.meta.env.VITE_CLOUDINARY_DEBUG === 'true') {
+      console.debug('Skipping Cloudinary URL:', url);
+    }
+    isSuitable = false;
   }
-  
   // 檢查是否為政府網站 URL（可能有特殊字符或限制）
-  if (url.includes('pet.gov.tw')) {
-    // 政府網站的圖片有時會有特殊字符或訪問限制
-    console.warn('Government website images may have special characters or access restrictions, using original URL:', url);
-    return false;
+  else if (url.includes('pet.gov.tw')) {
+    // Only log once per URL to reduce console noise
+    if (import.meta.env.DEV && import.meta.env.VITE_CLOUDINARY_DEBUG === 'true') {
+      console.debug('Government website images may have special characters or access restrictions, using original URL:', url);
+    }
+    isSuitable = false;
   }
   
-  // 其他情況都應該嘗試 Cloudinary 處理
-  return true;
+  // Cache the result
+  urlSuitabilityCache.set(url, isSuitable);
+  
+  // Clean cache if it gets too large
+  cleanCache(urlSuitabilityCache);
+  
+  return isSuitable;
 }
 
 /**
@@ -105,7 +133,9 @@ export function createOptimizedImage(src, config = {}) {
   try {
     // 檢查 URL 是否適合 Cloudinary 處理
     if (!isUrlSuitableForCloudinary(src)) {
-      console.warn('URL not suitable for Cloudinary processing, using original URL:', src);
+      if (import.meta.env.DEV && import.meta.env.VITE_CLOUDINARY_DEBUG === 'true') {
+        console.debug('URL not suitable for Cloudinary processing, using original URL:', src);
+      }
       return null;
     }
     
@@ -152,7 +182,9 @@ export function createPlaceholderImage(src) {
   try {
     // 檢查 URL 是否適合 Cloudinary 處理
     if (!isUrlSuitableForCloudinary(src)) {
-      console.warn('URL not suitable for Cloudinary placeholder processing, skipping placeholder:', src);
+      if (import.meta.env.DEV && import.meta.env.VITE_CLOUDINARY_DEBUG === 'true') {
+        console.debug('URL not suitable for Cloudinary placeholder processing, skipping placeholder:', src);
+      }
       return null;
     }
     

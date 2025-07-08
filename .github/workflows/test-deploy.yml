@@ -42,3 +42,9 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ANIMAL_ADOPTION_VITE_APP }}'
           projectId: animal-adoption-vite-app
           channelId: live
+        id: firebase_deploy
+
+      - name: Display deploy info
+        run: |
+          echo "Deploy URL: ${{ steps.firebase_deploy.outputs.details_url }}"
+          echo "Deploy status: ${{ steps.firebase_deploy.outputs.expire_time }}"

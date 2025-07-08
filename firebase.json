@@ -1,6 +1,5 @@
 {
   "hosting": {
-    "site": "animal-adoption-vite-app",
     "public": "dist",
     "ignore": [
       "firebase.json",

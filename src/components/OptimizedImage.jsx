@@ -6,6 +6,20 @@ import {
   isCloudinaryConfigured,
 } from "../utils/cloudinaryUtils";
 
+// Cache for cloudinary image objects to prevent repeated creation
+const cloudinaryImageCache = new Map();
+const placeholderImageCache = new Map();
+const MAX_CACHE_SIZE = 50;
+
+// Clean cache when it gets too large
+function cleanCache(cache) {
+  if (cache.size > MAX_CACHE_SIZE) {
+    // Remove oldest entries (first 10 entries)
+    const keysToDelete = Array.from(cache.keys()).slice(0, 10);
+    keysToDelete.forEach((key) => cache.delete(key));
+  }
+}
+
 // 預設圖片變換配置（簡化版）
 const PRESET_CONFIGS = {
   CARD_THUMBNAIL: {
@@ -60,14 +74,45 @@ const OptimizedImage = ({
 
     const config =
       customOptions || PRESET_CONFIGS[preset] || PRESET_CONFIGS.CARD_THUMBNAIL;
-    return createOptimizedImage(src, config);
+
+    // Create cache key from src and config
+    const cacheKey = `${src}_${JSON.stringify(config)}`;
+
+    // Check cache first
+    if (cloudinaryImageCache.has(cacheKey)) {
+      return cloudinaryImageCache.get(cacheKey);
+    }
+
+    const image = createOptimizedImage(src, config);
+
+    // Cache the result
+    if (image) {
+      cloudinaryImageCache.set(cacheKey, image);
+      cleanCache(cloudinaryImageCache);
+    }
+
+    return image;
   }, [src, preset, customOptions, cloudinaryAvailable, useCloudinary]);
 
   // 創建佔位符圖片
   const placeholderImage = useMemo(() => {
     if (!cloudinaryAvailable || !useCloudinary || !src || !showPlaceholder)
       return null;
-    return createPlaceholderImage(src);
+
+    // Check cache first
+    if (placeholderImageCache.has(src)) {
+      return placeholderImageCache.get(src);
+    }
+
+    const placeholder = createPlaceholderImage(src);
+
+    // Cache the result
+    if (placeholder) {
+      placeholderImageCache.set(src, placeholder);
+      cleanCache(placeholderImageCache);
+    }
+
+    return placeholder;
   }, [src, cloudinaryAvailable, useCloudinary, showPlaceholder]);
 
   // 處理 Cloudinary 圖片載入錯誤
