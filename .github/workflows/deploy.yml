@@ -24,7 +24,9 @@ jobs:
         run: npm ci
 
       - name: Install functions dependencies
-        run: npm ci --prefix functions
+        run: |
+          rm -f functions/package-lock.json
+          npm install --prefix functions
 
       - name: Run linting
         run: npm run lint
